@@ -1,0 +1,7 @@
+{
+  "broker": "zerodha",
+  "clientID": "ZW6568",
+  "appKey": "utrfgft9juwig32v",
+  "appSecret": "g92fphusikawy2ulgnl5fvb85vcwl2lc",
+  "redirectUrl": "http://localhost:8080/apis/broker/login/zerodha"
+}
