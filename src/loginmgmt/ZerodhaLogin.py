@@ -26,9 +26,11 @@ class ZerodhaLogin(BaseLogin):
       logging.info('Zerodha Login successful. accessToken = %s', accessToken)
 
       # set broker handle and access token to the instance
+      print(str(brokerHandle))
+      print(str(accessToken))
       self.setBrokerHandle(brokerHandle)
       self.setAccessToken(accessToken)
-
+      print(str(systemConfig['homeUrl']))
       # redirect to home page with query param loggedIn=true
       homeUrl = systemConfig['homeUrl'] + '?loggedIn=true'
       logging.info('Zerodha Redirecting to home page %s', homeUrl)
