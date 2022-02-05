@@ -45,4 +45,4 @@ brokerAppConfig = getBrokerAppConfig()
 logging.info('brokerAppConfig => %s', brokerAppConfig)
 port = serverConfig['port']
 
-app.run('35.165.32.180', port)
+app.run('0.0.0.0', port)
