@@ -2,6 +2,6 @@
   "port": 8080,
   "enableSSL": false,
   "sslPort": 8443,
-  "deployDir": "/home/ec2-user/AlgoZerodha",
-  "logFileDir": "/home/ec2-user/AlgoZerodha/logs"
+  "deployDir": "/home//ubuntu/AlgoZerodha",
+  "logFileDir": "/home//ubuntu/AlgoZerodha/"
 }
