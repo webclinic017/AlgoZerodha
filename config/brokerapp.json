@@ -3,5 +3,5 @@
   "clientID": "ZW6568",
   "appKey": "utrfgft9juwig32v",
   "appSecret": "g92fphusikawy2ulgnl5fvb85vcwl2lc",
-  "redirectUrl": "http://0.0.0.0:8080/apis/broker/login/zerodha"
+  "redirectUrl": "http://35.165.32.180:8080/apis/broker/login/zerodha"
 }
