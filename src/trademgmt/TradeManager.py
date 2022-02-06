@@ -165,7 +165,7 @@ class TradeManager:
     
 
     if trade.tradingSymbol not in TradeManager.registeredSymbols:
-      TradeManager.ticker.registerSymbols([Utils.prepareMonthlyExpiryFuturesSymbol('NIFTY')])
+      TradeManager.ticker.registerSymbols(['NIFTY22FEBFUT'])
       TradeManager.ticker.registerSymbols([trade.tradingSymbol])
       TradeManager.registeredSymbols.append(trade.tradingSymbol)
       TradeManager.directionDict = {trade.tradingSymbol:trade.direction}
@@ -191,7 +191,7 @@ class TradeManager:
       # On each new tick, get a created trade and call its strategy whether to place trade or not
       for strategy in TradeManager.strategyToInstanceMap:
         strategyInstance = TradeManager.strategyToInstanceMap[strategy]
-        if tick.tradingSymbol == Utils.prepareMonthlyExpiryFuturesSymbol('NIFTY'):
+        if tick.tradingSymbol == "NIFTY22FEBFUT":
           result = strategyInstance.adjustment(str(tick.lastTradedPrice))
         longTrade = TradeManager.getUntriggeredTrade(tick.tradingSymbol, strategy, Direction.LONG)
         shortTrade = TradeManager.getUntriggeredTrade(tick.tradingSymbol, strategy, Direction.SHORT)
