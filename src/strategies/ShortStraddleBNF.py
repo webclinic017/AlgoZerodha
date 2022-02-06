@@ -51,7 +51,9 @@ class ShortStraddleBNF(BaseStrategy):
   def process(self):
     now = datetime.now()
     if now < self.startTimestamp:
+      logging.error("BN TIME")
       return
+    logging.error("BN TIME ACTIVE")
     if len(self.trades) >= self.maxTradesPerDay:
       return
     # Get current market price of Nifty Future
