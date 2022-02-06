@@ -62,11 +62,11 @@ class Utils:
 
   @staticmethod
   def getMarketStartTime(dateTimeObj = None):
-    return Utils.getTimeOfDay(0, 10, 20, dateTimeObj)
+    return Utils.getTimeOfDay(9, 15, 0, dateTimeObj)
 
   @staticmethod
   def getMarketEndTime(dateTimeObj = None):
-    return Utils.getTimeOfDay(19, 55, 0, dateTimeObj)
+    return Utils.getTimeOfDay(15, 30, 0, dateTimeObj)
 
   @staticmethod
   def getTimeOfDay(hours, minutes, seconds, dateTimeObj = None):
@@ -124,8 +124,6 @@ class Utils:
     tradeValue = trade.entry * trade.filledQty
     if tradeValue > 0:
       trade.pnlPercentage = Utils.roundOff(trade.pnl * 100 / tradeValue)
-    logging.error("order trade----"+str(trade))
-    print("order pnl----"+trade.pnl+"---"+trade.filledQty+"-----"+trade.entry+"---"+trade.exit+"----"+trade.pnlPercentage)
     return trade
 
   @staticmethod

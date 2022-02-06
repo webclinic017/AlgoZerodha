@@ -36,7 +36,7 @@ class Instruments:
     if os.path.exists(instrumentsFilepath) == False:
       logging.warn('Instruments: instrumentsFilepath %s does not exist', instrumentsFilepath)
       return [] # returns empty list
-
+    print("SSSSS----"+str(instrumentsFilepath))
     isdFile = open(instrumentsFilepath, 'r')
     instruments = json.loads(isdFile.read())
     logging.info('Instruments: loaded %d instruments from file %s', len(instruments), instrumentsFilepath)

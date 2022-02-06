@@ -2,6 +2,6 @@
   "port": 8080,
   "enableSSL": false,
   "sslPort": 8443,
-  "deployDir": "/home//ubuntu/AlgoZerodha",
-  "logFileDir": "/home//ubuntu/AlgoZerodha/"
+  "deployDir": "/home/ubuntu/AlgoZerodha",
+  "logFileDir": "/home/ubuntu/AlgoZerodha"
 }

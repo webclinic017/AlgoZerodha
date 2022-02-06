@@ -8,7 +8,7 @@
   <title>Algo Trading - Python</title>
   <style>
     .button {
-      background-color: red;
+      background-color: #53a5b0;
       border: none;
       padding: 15px 32px;
       text-align: center;
@@ -26,7 +26,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script>
     function stopAlgo() {
-      var url =  "https://www.adjustmenttraderalgo.tk/apis/algo/stop"
+      var url =  "https://www.adjustmenttraderalgo.tk" + "/apis/algo/stop"
       var data = {};
       $.post(url, {},  
         function(data, status, xhr) {
@@ -40,13 +40,12 @@
 </head>
 
 <body>
-  <h1 style="color: red" class="center">Short Straddle Algo in Nifty is Active with Adjustment and SL in Place</h1>
-  <h1 style="color: blue" class="center">Monitor Zerodha Postion to trade the Algo execution and MTM</h1>
-  <h1 style="color: green" class="center">Happy Trading Day</h1>
+  <h1 style="color: blue" class="center">Welcome to algo trading in python</h1>
   <div class="center">
-    <button class="button" style="color: white" onClick="stopAlgo()">
-      Stop Algo
-    </button>
+    button class="button" onClick="stopAlgo()">
+      Start Stop
+  </button>
+    <h4>Algo is running...</h4>
   </div>
 </body>
 

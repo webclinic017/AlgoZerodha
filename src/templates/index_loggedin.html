@@ -8,7 +8,7 @@
   <title>Algo Trading - Python</title>
   <style>
     .button {
-      background-color: green;
+      background-color: #53a5b0;
       border: none;
       padding: 15px 32px;
       text-align: center;
@@ -26,7 +26,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script>
     function startAlgo() {
-      var url =  "https://www.adjustmenttraderalgo.tk/apis/algo/start"
+      var url =  "https://www.adjustmenttraderalgo.tk" + "/apis/algo/start"
       var data = {};
       $.post(url, {},  
         function(data, status, xhr) {
@@ -44,9 +44,9 @@
 </head>
 
 <body>
-  <h1 style="color: green" class="center">Are you and Market Condition Ok Today ? To Start Short Straddle in Nifty Weekly Option </h1>
+  <h1 style="color: blue" class="center">Welcome to algo trading in python</h1>
   <div class="center">
-    <button class="button" style="color: white" onClick="startAlgo()">
+    <button class="button" onClick="startAlgo()">
       Start Algo
     </button>
   </div>

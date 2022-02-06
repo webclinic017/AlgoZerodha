@@ -32,16 +32,15 @@ class ShortStraddleBNF(BaseStrategy):
     self.symbols = []
     self.slPercentage = 30
     self.targetPercentage = 0
-    self.startTimestamp = Utils.getTimeOfToDay(0, 10, 20) # When to start the strategy. Default is Market start time
-    self.stopTimestamp = Utils.getTimeOfToDay(19, 0, 0) # This is not square off timestamp. This is the timestamp after which no new trades will be placed under this strategy but existing trades continue to be active.
-    self.squareOffTimestamp = Utils.getTimeOfToDay(19, 53, 0) # Square off time
+    self.startTimestamp = Utils.getTimeOfToDay(9, 15, 28) # When to start the strategy. Default is Market start time
+    self.stopTimestamp = Utils.getTimeOfToDay(15, 15, 0) # This is not square off timestamp. This is the timestamp after which no new trades will be placed under this strategy but existing trades continue to be active.
+    self.squareOffTimestamp = Utils.getTimeOfToDay(15, 23, 0) # Square off time
     self.capital = 100000 # Capital to trade (This is the margin you allocate from your broker account for this strategy)
     self.leverage = 0
     self.maxTradesPerDay = 2 # (1 CE + 1 PE) Max number of trades per day under this strategy
     self.isFnO = True # Does this strategy trade in FnO or not
     self.capitalPerSet = 105000 # Applicable if isFnO is True (1 set means 1CE/1PE or 2CE/2PE etc based on your strategy logic)
     logging.error("BN STRADDLE STARTING")
-    self.atm = ""
     self.process()
 
   def canTradeToday(self):
@@ -64,7 +63,6 @@ class ShortStraddleBNF(BaseStrategy):
 
     ATMStrike = Utils.getNearestStrikePrice(quote.lastTradedPrice, 50)
     logging.info('%s: Nifty CMP = %f, ATMStrike = %d', self.getName(), quote.lastTradedPrice, ATMStrike)
-    atm=ATMStrike
     ATMCESymbol = Utils.prepareWeeklyOptionsSymbol("NIFTY", ATMStrike, 'CE')
     ATMPESymbol = Utils.prepareWeeklyOptionsSymbol("NIFTY", ATMStrike, 'PE')
     logging.info('%s: ATMCESymbol = %s, ATMPESymbol = %s', self.getName(), ATMCESymbol, ATMPESymbol)
@@ -95,7 +93,7 @@ class ShortStraddleBNF(BaseStrategy):
     
     isd = Instruments.getInstrumentDataBySymbol(optionSymbol) # Get instrument data to know qty per lot
     #trade.qty = isd['lot_size'] * numLots
-    trade.qty = 50
+    trade.qty = 600
     
     #trade.stopLoss = Utils.roundToNSEPrice(trade.requestedEntry + trade.requestedEntry * self.slPercentage / 100)
     #trade.target = 0 # setting to 0 as no target is applicable for this trade
@@ -115,14 +113,11 @@ class ShortStraddleBNF(BaseStrategy):
     try:
       strike = set()
       strikeprice = None
-      strikepricece = None
-      strikepricepe = None
       upSide = None
       downSide = None
       for tr in TradeManager.trades:
         if tr.tradeState == "active":
           strike.add(str(tr.tradingSymbol)[10:15])
-      print(str(strike)+"------"+str(price))
       #To do###
       # ###Scenario 1
       if (len(strike) == 1):

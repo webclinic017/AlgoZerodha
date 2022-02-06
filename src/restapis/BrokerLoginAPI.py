@@ -7,5 +7,4 @@ from core.Controller import Controller
 class BrokerLoginAPI(MethodView):
   def get(self):
     redirectUrl = Controller.handleBrokerLogin(request.args)
-    print(str(redirectUrl))
     return redirect(redirectUrl, code=302)

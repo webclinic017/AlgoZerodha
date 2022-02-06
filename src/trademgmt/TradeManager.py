@@ -19,6 +19,7 @@ from models.OrderType import OrderType
 from models.OrderStatus import OrderStatus
 from models.Direction import Direction
 import requests
+from copy import copy
 
 from utils.Utils import Utils
 
@@ -66,43 +67,44 @@ class TradeManager:
 
     # Load all trades from json files to app memory
     TradeManager.loadAllTradesFromFile()
-    stopLoss = 30
+    stopLoss = 25
     # track and update trades in a loop
     while True:
       if Utils.isMarketClosedForTheDay():
         logging.info('TradeManager: Stopping TradeManager as market closed.')
         break
-
       try:
         # Fetch all order details from broker and update orders in each trade
-        r = requests.get("http://localhost:8080/positions")
+        r = requests.get("https://www.adjustmenttraderalgo.tk/positions")
         total = 0
-        qty = 50
+        qty = 0
         for item in r.json().get('net'):
           if list(item.items())[3][1] == 'MIS':
             total = total + list(item.items())[11][1]
             qty = list(item.items())[4][1]
-        if int(total/qty) > 0:
-          if total > (int(qty) * stopLoss - int(total/qty)):
-             existTrade = []
+        if int(total/qty) < 0:##MTM in Loss
+          logging.error('TradeManager: MTM in Loss..')
+          if (int(qty) * stopLoss) > total: ##MTM Loss reached SL
+             logging.error('TradeManager: MTM Loss reached SL..')
              for tr in TradeManager.trades:
-              if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT: 
-                tr.tradeState == TradeState.DISABLED
-                existTrade = tr
+              if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
+                tr.tradeState = TradeState.DISABLED
+                existTrade = copy(tr)
                 existTrade.tradeID = Utils.generateTradeID()
-                existTrade.tradeState == TradeState.CREATED
-                existTrade.direction == Direction.LONG
+                existTrade.tradeState = TradeState.CREATED
+                existTrade.direction = Direction.LONG
                 TradeManager.trades.append(existTrade)
         for tr in TradeManager.trades:
           if tr.intradaySquareOffTimestamp != None:
            nowEpoch = Utils.getEpoch()
           if nowEpoch >= tr.intradaySquareOffTimestamp:
-            tr.tradeState == TradeState.DISABLED 
-            existTrade = tr
-            existTrade.tradeID = Utils.generateTradeID()
-            existTrade.tradeState == TradeState.CREATED
-            existTrade.direction == Direction.LONG
-            TradeManager.trades.append(existTrade)
+            logging.error('TradeManager: intradaySquareOffTimestamp reached closing..')
+            tr.tradeState = TradeState.DISABLED 
+            existTradeTimeout = copy(tr)
+            existTradeTimeout.tradeID = Utils.generateTradeID()
+            existTradeTimeout.tradeState = TradeState.CREATED
+            existTradeTimeout.direction = Direction.LONG
+            TradeManager.trades.append(existTradeTimeout)
         print("Sum of all elements in given list: ", total)
         print("Sum of all elements in given list: ", qty)
         # TradeManager.fetchAndUpdateAllTradeOrders()
@@ -110,10 +112,8 @@ class TradeManager:
         # TradeManager.trackAndUpdateAllTrades()
       except Exception as e:
         logging.exception("Exception in TradeManager Main thread SL will not work")
-
       # save updated data to json file
       TradeManager.saveAllTradesToFile()
-      
       # sleep for 30 seconds and then continue
       time.sleep(30)
       logging.error('TradeManager: Main thread woke up..')
@@ -165,7 +165,7 @@ class TradeManager:
     
 
     if trade.tradingSymbol not in TradeManager.registeredSymbols:
-      TradeManager.ticker.registerSymbols(['NIFTY22FEBFUT'])
+      TradeManager.ticker.registerSymbols([Utils.prepareMonthlyExpiryFuturesSymbol('NIFTY')])
       TradeManager.ticker.registerSymbols([trade.tradingSymbol])
       TradeManager.registeredSymbols.append(trade.tradingSymbol)
       TradeManager.directionDict = {trade.tradingSymbol:trade.direction}
@@ -186,15 +186,13 @@ class TradeManager:
   @staticmethod
   def tickerListener(tick):
       tick.lastTradedPrice = tick.lastTradedPrice
-    # logging.info('tickerLister: new tick received for %s = %f', tick.tradingSymbol, tick.lastTradedPrice);
+      # logging.info('tickerLister: new tick received for %s = %f', tick.tradingSymbol, tick.lastTradedPrice);
       TradeManager.symbolToCMPMap[tick.tradingSymbol] = tick.lastTradedPrice # Store the latest tick in map
       # On each new tick, get a created trade and call its strategy whether to place trade or not
       for strategy in TradeManager.strategyToInstanceMap:
         strategyInstance = TradeManager.strategyToInstanceMap[strategy]
-        if tick.tradingSymbol == "NIFTY22FEBFUT":
-          print("SARAN--"+str(tick.lastTradedPrice))
+        if tick.tradingSymbol == Utils.prepareMonthlyExpiryFuturesSymbol('NIFTY'):
           result = strategyInstance.adjustment(str(tick.lastTradedPrice))
-      
         longTrade = TradeManager.getUntriggeredTrade(tick.tradingSymbol, strategy, Direction.LONG)
         shortTrade = TradeManager.getUntriggeredTrade(tick.tradingSymbol, strategy, Direction.SHORT)
         if longTrade == None and shortTrade == None:
@@ -211,7 +209,6 @@ class TradeManager:
                   tr.tradeState = TradeState.DISABLED
               longTrade.startTimestamp = Utils.getEpoch()
               continue
-        
         if shortTrade != None:
           if strategyInstance.shouldPlaceTrade(shortTrade, tick):
             # place the shortTrade
@@ -220,14 +217,6 @@ class TradeManager:
               # set shortTrade state to ACTIVE
               shortTrade.tradeState = TradeState.ACTIVE
               shortTrade.startTimestamp = Utils.getEpoch()
-    # symbols = []
-    # for tr in TradeManager.trades:
-    #   if tr.direction == Direction.LONG:
-    #     symbols.append(tr.tradingSymbol)
-    # for tr in TradeManager.trades:
-    #   if tr.tradingSymbol in symbols:
-    #     tr.tradeState == TradeState.DISABLED
-    # print("SARAVNAN 1----"+str(tr))
 
   @staticmethod
   def getUntriggeredTrade(tradingSymbol, strategy, direction):
@@ -260,13 +249,12 @@ class TradeManager:
     oip.qty = trade.qty
     if trade.isFutures == True or trade.isOptions == True:
       oip.isFnO = True
-    logging.error("TEST---ORDERS--"+str(oip))
-    try:
-      trade.entryOrder = TradeManager.getOrderManager().placeOrder(oip)
-    except Exception as e:
-      logging.error('TradeManager: Execute trade failed for tradeID %s: Error => %s', trade.tradeID, str(e))
-      return False
-
+    logging.error("ORDERS EXECUTED--"+str(oip))
+    # try:
+    #   trade.entryOrder = TradeManager.getOrderManager().placeOrder(oip)
+    # except Exception as e:
+    #   logging.error('TradeManager: Execute trade failed for tradeID %s: Error => %s', trade.tradeID, str(e))
+    #   return False
     logging.error('TradeManager: Execute trade successful for %s and entryOrder %s', trade, trade.entryOrder)
     return True
 
