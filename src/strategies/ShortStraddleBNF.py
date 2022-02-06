@@ -51,8 +51,8 @@ class ShortStraddleBNF(BaseStrategy):
   def process(self):
     now = datetime.now()
     if now < self.startTimestamp:
-      logging.error("BN TIME"+ str(now))
       return
+    logging.error("BN TIME"+ str(now))
     logging.error("BN TIME ACTIVE"+str(self.startTimestamp))
     if len(self.trades) >= self.maxTradesPerDay:
       return
