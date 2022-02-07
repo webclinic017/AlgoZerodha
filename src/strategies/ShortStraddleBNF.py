@@ -95,7 +95,7 @@ class ShortStraddleBNF(BaseStrategy):
     
     isd = Instruments.getInstrumentDataBySymbol(optionSymbol) # Get instrument data to know qty per lot
     #trade.qty = isd['lot_size'] * numLots
-    trade.qty = 600
+    trade.qty = 200
     
     #trade.stopLoss = Utils.roundToNSEPrice(trade.requestedEntry + trade.requestedEntry * self.slPercentage / 100)
     #trade.target = 0 # setting to 0 as no target is applicable for this trade
@@ -189,7 +189,7 @@ class ShortStraddleBNF(BaseStrategy):
     
     isd = Instruments.getInstrumentDataBySymbol(optionSymbol) # Get instrument data to know qty per lot
     #trade.qty = isd['lot_size'] * numLots
-    trade.qty = 50
+    trade.qty = 200
     
     # trade.stopLoss = Utils.roundToNSEPrice(trade.requestedEntry + trade.requestedEntry * self.slPercentage / 100)
     # trade.target = 0 # setting to 0 as no target is applicable for this trade
