@@ -82,18 +82,19 @@ class TradeManager:
           if list(item.items())[3][1] == 'MIS':
             total = total + list(item.items())[11][1]
             qty = list(item.items())[4][1]
-        if int(total/qty) < 0:##MTM in Loss
-          logging.error('TradeManager: MTM in Loss..')
-          if (int(qty) * stopLoss) > total: ##MTM Loss reached SL
-             logging.error('TradeManager: MTM Loss reached SL..')
-             for tr in TradeManager.trades:
-              if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
-                tr.tradeState = TradeState.DISABLED
-                existTrade = copy(tr)
-                existTrade.tradeID = Utils.generateTradeID()
-                existTrade.tradeState = TradeState.CREATED
-                existTrade.direction = Direction.LONG
-                TradeManager.trades.append(existTrade)
+        if qty > 1 and total > 1:
+          if int(total/qty) < 0:##MTM in Loss
+            logging.error('TradeManager: MTM in Loss..')
+            if (int(qty) * stopLoss) > total: ##MTM Loss reached SL
+               logging.error('TradeManager: MTM Loss reached SL..')
+               for tr in TradeManager.trades:
+                if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
+                  tr.tradeState = TradeState.DISABLED
+                  existTrade = copy(tr)
+                  existTrade.tradeID = Utils.generateTradeID()
+                  existTrade.tradeState = TradeState.CREATED
+                  existTrade.direction = Direction.LONG
+                  TradeManager.trades.append(existTrade)
         for tr in TradeManager.trades:
           if tr.intradaySquareOffTimestamp != None:
            nowEpoch = Utils.getEpoch()
