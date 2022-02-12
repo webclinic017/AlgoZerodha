@@ -3,7 +3,6 @@ from flask import render_template, request
 
 class HomeAPI(MethodView):
   def get(self):
-    print(str(request.args))
     if 'loggedIn' in request.args and request.args['loggedIn'] == 'true':
       return render_template('index_loggedin.html')
     elif 'algoStarted' in request.args and request.args['algoStarted'] == 'true':

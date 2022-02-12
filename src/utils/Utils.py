@@ -62,11 +62,11 @@ class Utils:
 
   @staticmethod
   def getMarketStartTime(dateTimeObj = None):
-    return Utils.getTimeOfDay(9, 15, 0, dateTimeObj)
+    return Utils.getTimeOfDay(9, 15, 20, dateTimeObj)
 
   @staticmethod
   def getMarketEndTime(dateTimeObj = None):
-    return Utils.getTimeOfDay(15, 30, 0, dateTimeObj)
+    return Utils.getTimeOfDay(15, 10, 0, dateTimeObj)
 
   @staticmethod
   def getTimeOfDay(hours, minutes, seconds, dateTimeObj = None):
@@ -137,7 +137,7 @@ class Utils:
     year2Digits = str(expiryDateTime.year)[2:]
     monthShort = calendar.month_name[expiryDateTime.month].upper()[0:3]
     futureSymbol = inputSymbol + year2Digits + monthShort + 'FUT'
-    logging.info('prepareMonthlyExpiryFuturesSymbol[%s] = %s', inputSymbol, futureSymbol)  
+    #logging.info('prepareMonthlyExpiryFuturesSymbol[%s] = %s', inputSymbol, futureSymbol)  
     return futureSymbol
 
   @staticmethod

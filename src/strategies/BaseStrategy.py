@@ -119,7 +119,6 @@ class BaseStrategy:
 
   def addTradeToList(self, trade):
     if trade != None:
-      print("SARAVAN00000000"+trade.direction)
       self.trades.append(trade)
 
   def getQuote(self, tradingSymbol):

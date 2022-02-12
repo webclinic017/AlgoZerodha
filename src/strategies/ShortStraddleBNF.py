@@ -1,5 +1,7 @@
 import logging
 from datetime import datetime
+from multiprocessing import synchronize
+from pickle import FALSE, TRUE
 from tkinter import E
 
 from instruments.Instruments import Instruments
@@ -9,10 +11,13 @@ from strategies.BaseStrategy import BaseStrategy
 from utils.Utils import Utils
 from trademgmt.Trade import Trade
 from trademgmt.TradeManager import TradeManager
+import threading
+import random
 
 # Each strategy has to be derived from BaseStrategy
 class ShortStraddleBNF(BaseStrategy):
   __instance = None
+  flag = "no"
 
   @staticmethod
   def getInstance(): # singleton class
@@ -32,9 +37,9 @@ class ShortStraddleBNF(BaseStrategy):
     self.symbols = []
     self.slPercentage = 30
     self.targetPercentage = 0
-    self.startTimestamp = Utils.getTimeOfToDay(9, 15, 28) # When to start the strategy. Default is Market start time
-    self.stopTimestamp = Utils.getTimeOfToDay(15, 15, 0) # This is not square off timestamp. This is the timestamp after which no new trades will be placed under this strategy but existing trades continue to be active.
-    self.squareOffTimestamp = Utils.getTimeOfToDay(15, 23, 0) # Square off time
+    self.startTimestamp = Utils.getTimeOfToDay(9, 15, 20) # When to start the strategy. Default is Market start time
+    self.stopTimestamp = Utils.getTimeOfToDay(15, 0, 0) # This is not square off timestamp. This is the timestamp after which no new trades will be placed under this strategy but existing trades continue to be active.
+    self.squareOffTimestamp = Utils.getTimeOfToDay(15, 10, 0) # Square off time
     self.capital = 100000 # Capital to trade (This is the margin you allocate from your broker account for this strategy)
     self.leverage = 0
     self.maxTradesPerDay = 2 # (1 CE + 1 PE) Max number of trades per day under this strategy
@@ -52,8 +57,6 @@ class ShortStraddleBNF(BaseStrategy):
     now = datetime.now()
     if now < self.startTimestamp:
       return
-    logging.error("BN TIME"+ str(now))
-    logging.error("BN TIME ACTIVE"+str(self.startTimestamp))
     if len(self.trades) >= self.maxTradesPerDay:
       return
     # Get current market price of Nifty Future
@@ -113,6 +116,8 @@ class ShortStraddleBNF(BaseStrategy):
 
   def adjustment(self,price):
     try:
+      lock = threading.Lock()
+      lock.acquire()
       strike = set()
       strikeprice = None
       upSide = None
@@ -128,15 +133,17 @@ class ShortStraddleBNF(BaseStrategy):
           upSide = int(strikeprice) + 60
           downSide = int(strikeprice) - 60
         #if (int("17210") >= upSide):
-        if (int(float(price)) >= upSide):
+        if (int(float(price)) >= upSide) and ShortStraddleBNF.flag == "no":
+          ShortStraddleBNF.flag = "yes"
           sell = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(strikeprice)+50, 'CE') ##sell 
           buy = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(strikeprice), 'CE') ##buy    
-          self.generateAdjustmentTrades(buy, sell)
+          self.generateAdjustmentTrades(buy, sell, price)
         #if (int("17010") <= downSide):
-        if (int(float(price)) <= downSide):
+        if (int(float(price)) <= downSide) and ShortStraddleBNF.flag == "no":
+          ShortStraddleBNF.flag = "yes"
           sell = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(strikeprice)-50, 'PE') ##sell 
           buy = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(strikeprice), 'PE')   ##buy
-          self.generateAdjustmentTrades(buy, sell)
+          self.generateAdjustmentTrades(buy, sell, price)
       elif (len(strike) == 2):
         one = strike.pop()
         two = strike.pop()
@@ -151,21 +158,24 @@ class ShortStraddleBNF(BaseStrategy):
         if price != None and ce != None and pe != None:
           upSide = int(ce) + 25
           downSide = int(pe) - 25
-        if (int(float(price)) >= upSide):
+        if (int(float(price)) >= upSide) and ShortStraddleBNF.flag == "yes":
+          ShortStraddleBNF.flag = "no"
           buy = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(pe), 'PE') ##buy
           sell = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(pe)+50, 'PE') ##sell
-          self.generateAdjustmentTrades(buy, sell)   
-        if (int(float(price)) <= downSide):
+          self.generateAdjustmentTrades(buy, sell, price)   
+        if (int(float(price)) <= downSide) and ShortStraddleBNF.flag == "yes":
+          ShortStraddleBNF.flag = "no"
           buy = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(ce), 'CE') ##buy
           sell = Utils.prepareWeeklyOptionsSymbol("NIFTY", int(ce)-50, 'CE') ##sell
-          self.generateAdjustmentTrades(buy, sell)
+          self.generateAdjustmentTrades(buy, sell, price)
       else:
         logging.error('No trade to adjustment')
+      lock.release()
     except Exception as e:
       print(str(e))
     return True
 
-  def generateAdjustmentTrades(self, buy, sell):
+  def generateAdjustmentTrades(self, buy, sell, price):
     numLots = self.calculateLotsPerTrade()
     closeTrade = self.getQuote(buy)
     openTrade = self.getQuote(sell)
@@ -173,11 +183,11 @@ class ShortStraddleBNF(BaseStrategy):
       logging.error('%s: Could not get quotes for option symbols', self.getName())
       return
 
-    self.generateAdjustmentTrade(buy, numLots, closeTrade.lastTradedPrice, Direction.LONG)
-    self.generateAdjustmentTrade(sell, numLots, openTrade.lastTradedPrice, Direction.SHORT)
+    self.generateAdjustmentTrade(buy, numLots, closeTrade.lastTradedPrice, Direction.LONG, price)
+    self.generateAdjustmentTrade(sell, numLots, openTrade.lastTradedPrice, Direction.SHORT, price)
     logging.error('%s: Trades generated.', self.getName())
 
-  def generateAdjustmentTrade(self, optionSymbol, numLots, lastTradedPrice, direction):
+  def generateAdjustmentTrade(self, optionSymbol, numLots, lastTradedPrice, direction, price):
     trade = Trade(optionSymbol)
     trade.strategy = self.getName()
     trade.isOptions = True
@@ -196,9 +206,15 @@ class ShortStraddleBNF(BaseStrategy):
 
     trade.intradaySquareOffTimestamp = Utils.getEpoch(self.squareOffTimestamp)
     # Hand over the trade to TradeManager
-    for tr in TradeManager.trades:
-      if tr.tradingSymbol == trade.tradingSymbol and tr.strategy == trade.strategy and tr.direction == trade.direction and tr.tradeState != "disabled":
-        return True
+    # for tr in TradeManager.trades:
+    #   if tr.tradingSymbol == trade.tradingSymbol and tr.strategy == trade.strategy and tr.direction == trade.direction and trade.tradeState == "created":
+    #     print(str(trade.tradingSymbol)+"----"+str(price)+"----"+str(trade.direction)+"-----"+str(trade.tradeState)+"-----"+str(tr.tradeState)+"-----"+str(tr.direction))          
+    #     # if tr.tradeState == "disabled":
+    #     #   TradeManager.trades.append(trade)
+    #     return 0
+    #   # else:
+    #   #   print(str(trade.tradingSymbol)+"--ELSE---"+str(trade.direction)+"--ELSE---"+str(trade.tradeState)+"--ELSE---"+str(tr.tradeState)+"-ELSE----"+str(tr.direction))
+
     TradeManager.addNewTrade(trade)
 
   def getTrailingSL(self, trade):
