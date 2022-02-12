@@ -2,6 +2,6 @@
   "port": 8080,
   "enableSSL": false,
   "sslPort": 8443,
-  "deployDir": "C:/Algo/",
-  "logFileDir": "C:/Algo/logs"
+  "deployDir": "/home/ubuntu/",
+  "logFileDir": "/home/ubuntu/"
 }
