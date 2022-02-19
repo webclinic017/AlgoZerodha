@@ -116,7 +116,6 @@ class TradeManager:
             existTradeTimeout.tradeState = TradeState.CREATED
             existTradeTimeout.direction = Direction.LONG
             TradeManager.trades.append(existTradeTimeout)
-        print("Sum of all elements in given list: ", total)
         # TradeManager.fetchAndUpdateAllTradeOrders()
         # # track each trade and take necessary action
         # TradeManager.trackAndUpdateAllTrades()
