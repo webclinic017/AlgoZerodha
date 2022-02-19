@@ -68,7 +68,9 @@ class TradeManager:
 
     # Load all trades from json files to app memory
     TradeManager.loadAllTradesFromFile()
-    stopLoss = -25
+    stopLoss = 0
+    dict = {}
+    previoustotal = 0
     # track and update trades in a loop
     while True:
       if Utils.isMarketClosedForTheDay():
@@ -78,7 +80,6 @@ class TradeManager:
         # Fetch all order details from broker and update orders in each trade
         r = requests.get("https://www.adjustmenttraderalgo.tk/positions")
         total = 0
-        dict = {}
         for item in r.json().get('net'):
           if list(item.items())[3][1] == 'MIS':
             symbol = list(item.items())[0][1]
@@ -86,8 +87,14 @@ class TradeManager:
             lastTradedPrice = quto.lastTradedPrice
             avgPrice = list(item.items())[7][1]
             if avgPrice != 0:
-              dict = {symbol : avgPrice }
+              avg = {symbol : avgPrice }
+              dict.update(avg)
             total = total + (dict.get(symbol) - lastTradedPrice)
+        print('Total MTM.---'+str(total))
+        if total > previoustotal:
+          previoustotal = total
+        if total > 0 and total >= previoustotal:
+          stopLoss = -25 + total        
         if stopLoss > total:
           for tr in TradeManager.trades:
             if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
