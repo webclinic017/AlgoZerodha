@@ -95,16 +95,16 @@ class TradeManager:
         if total > 0 and total >= previoustotal:
           stopLoss = -25 + total
         logging.error("stopLoss: total "+str(stopLoss)+"----"+str(total))
-#         if stopLoss > total:
-#           for tr in TradeManager.trades:
-#             if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
-#               tr.tradeState = TradeState.DISABLED
-#               existTrade = copy(tr)
-#               existTrade.tradeID = Utils.generateTradeID()
-#               existTrade.tradeState = TradeState.CREATED
-#               existTrade.direction = Direction.LONG
-#               TradeManager.trades.append(existTrade)
-#               print('TradeManager: MTM Loss reached SL..')
+        if stopLoss > total or total > 30:
+          for tr in TradeManager.trades:
+            if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
+              tr.tradeState = TradeState.DISABLED
+              existTrade = copy(tr)
+              existTrade.tradeID = Utils.generateTradeID()
+              existTrade.tradeState = TradeState.CREATED
+              existTrade.direction = Direction.LONG
+              TradeManager.trades.append(existTrade)
+              print('TradeManager: MTM Loss reached SL..')
         for tr in TradeManager.trades:
           if tr.intradaySquareOffTimestamp != None:
            nowEpoch = Utils.getEpoch()
