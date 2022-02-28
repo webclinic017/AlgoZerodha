@@ -1,7 +1,7 @@
 {
   "broker": "zerodha",
-  "clientID": "ZW6568",
-  "appKey": "utrfgft9juwig32v",
-  "appSecret": "g92fphusikawy2ulgnl5fvb85vcwl2lc",
+  "clientID": "xxxxx",
+  "appKey": "xxxxxx",
+  "appSecret": "xxxxxxx",
   "redirectUrl": "https://www.adjustmenttraderalgo.tk/apis/broker/login/zerodha"
 }
