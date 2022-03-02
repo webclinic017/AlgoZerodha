@@ -70,6 +70,7 @@ class TradeManager:
     TradeManager.loadAllTradesFromFile()
     stopLoss = 0
     dict = {}
+    lastPriceDict = {}
     previoustotal = 0
     # track and update trades in a loop
     while True:
@@ -80,22 +81,24 @@ class TradeManager:
         # Fetch all order details from broker and update orders in each trade
         r = requests.get("https://www.adjustmenttraderalgo.tk/positions")
         total = 0
-        for item in r.json().get('net'):
+for item in r.json().get('net'):
           if list(item.items())[3][1] == 'MIS':
             symbol = list(item.items())[0][1]
             quto = Quotes.getQuote(symbol,True)
-            lastTradedPrice = quto.lastTradedPrice
             avgPrice = list(item.items())[7][1]
+            logging.error('avgPrice....'+str(avgPrice))
             if avgPrice != 0:
               avg = {symbol : avgPrice }
               dict.update(avg)
-            total = total + (dict.get(symbol) - lastTradedPrice)
+              lastprice = {symbol : quto.lastTradedPrice }
+              lastPriceDict.update(lastprice)
+            total = total + (dict.get(symbol) - lastPriceDict.get(symbol))
         if total > previoustotal:
           previoustotal = total
         if total > 0 and total >= previoustotal:
           stopLoss = -25 + total
         logging.error('total....'+str(total))
-        logging.error('stopLoss....'+str(stopLoss))          
+        logging.error('stopLoss....'+str(stopLoss))
         if stopLoss > total or total > 30:
           for tr in TradeManager.trades:
             logging.error('TradeManager: MTM Loss reached SL..')
@@ -105,7 +108,7 @@ class TradeManager:
             #   existTrade.tradeID = Utils.generateTradeID()
             #   existTrade.tradeState = TradeState.CREATED
             #   existTrade.direction = Direction.LONG
-            #   TradeManager.trades.append(existTrade)              
+            #   TradeManager.trades.append(existTrade)
         for tr in TradeManager.trades:
           if tr.intradaySquareOffTimestamp != None:
            nowEpoch = Utils.getEpoch()
