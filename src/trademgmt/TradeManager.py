@@ -81,7 +81,7 @@ class TradeManager:
         # Fetch all order details from broker and update orders in each trade
         r = requests.get("https://www.adjustmenttraderalgo.tk/positions")
         total = 0
-for item in r.json().get('net'):
+        for item in r.json().get('net'):
           if list(item.items())[3][1] == 'MIS':
             symbol = list(item.items())[0][1]
             quto = Quotes.getQuote(symbol,True)
