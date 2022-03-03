@@ -68,7 +68,7 @@ class TradeManager:
 
     # Load all trades from json files to app memory
     TradeManager.loadAllTradesFromFile()
-    stopLoss = 0
+    stopLoss = -25
     dict = {}
     lastPriceDict = {}
     previoustotal = 0
