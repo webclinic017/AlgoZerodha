@@ -102,24 +102,24 @@ class TradeManager:
         if stopLoss > total or total > 30:
           for tr in TradeManager.trades:
             logging.error('TradeManager: MTM Loss reached SL..')
-            # if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
-            #   tr.tradeState = TradeState.DISABLED
-            #   existTrade = copy(tr)
-            #   existTrade.tradeID = Utils.generateTradeID()
-            #   existTrade.tradeState = TradeState.CREATED
-            #   existTrade.direction = Direction.LONG
-            #   TradeManager.trades.append(existTrade)
+            if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
+              tr.tradeState = TradeState.DISABLED
+              existTrade = copy(tr)
+              existTrade.tradeID = Utils.generateTradeID()
+              existTrade.tradeState = TradeState.CREATED
+              existTrade.direction = Direction.LONG
+              TradeManager.trades.append(existTrade)
         for tr in TradeManager.trades:
           if tr.intradaySquareOffTimestamp != None:
            nowEpoch = Utils.getEpoch()
           if nowEpoch >= tr.intradaySquareOffTimestamp and tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
             logging.error('TradeManager: intradaySquareOffTimestamp reached closing..')
-            # tr.tradeState = TradeState.DISABLED 
-            # existTradeTimeout = copy(tr)
-            # existTradeTimeout.tradeID = Utils.generateTradeID()
-            # existTradeTimeout.tradeState = TradeState.CREATED
-            # existTradeTimeout.direction = Direction.LONG
-            # TradeManager.trades.append(existTradeTimeout)
+            tr.tradeState = TradeState.DISABLED 
+            existTradeTimeout = copy(tr)
+            existTradeTimeout.tradeID = Utils.generateTradeID()
+            existTradeTimeout.tradeState = TradeState.CREATED
+            existTradeTimeout.direction = Direction.LONG
+            TradeManager.trades.append(existTradeTimeout)
         # TradeManager.fetchAndUpdateAllTradeOrders()
         # # track each trade and take necessary action
         # TradeManager.trackAndUpdateAllTrades()
