@@ -127,8 +127,8 @@ class TradeManager:
         logging.exception("Exception in TradeManager Main thread SL will not work")
       # save updated data to json file
       TradeManager.saveAllTradesToFile()
-      # sleep for 30 seconds and then continue
-      time.sleep(30)
+      # sleep for 10 seconds and then continue
+      time.sleep(10)
       logging.error('TradeManager: Main thread woke up..')
 
   @staticmethod
