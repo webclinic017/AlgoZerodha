@@ -100,6 +100,7 @@ class TradeManager:
         logging.error('total....'+str(total))
         logging.error('stopLoss....'+str(stopLoss))
         if stopLoss > total or total > 30:
+          time.sleep(5)
           for tr in TradeManager.trades:
             logging.error('TradeManager: MTM Loss reached SL..')
             if tr.tradeState == TradeState.ACTIVE and tr.direction == Direction.SHORT:
